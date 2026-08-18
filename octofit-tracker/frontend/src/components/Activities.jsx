@@ -1,8 +1,18 @@
-import { displayName, useApi, API_BASE_URL } from '../api.js'
+import { useEffect, useState } from 'react'
+import { displayName } from '../api.js'
 
 export default function Activities() {
-  const endpoint = `${API_BASE_URL}/api/activities/`
-  const { items, loading, error } = useApi(endpoint)
+  const [items, setItems] = useState([])
+  const endpoint = import.meta.env.VITE_CODESPACE_NAME
+    ? `https://${import.meta.env.VITE_CODESPACE_NAME}-8000.app.github.dev/api/activities/`
+    : 'http://localhost:8000/api/activities/'
+
+  useEffect(() => {
+    fetch(endpoint)
+      .then((response) => response.json())
+      .then((data) => setItems(Array.isArray(data) ? data : data.data || data.results || data.items || []))
+      .catch((error) => console.error('Activities API error:', error))
+  }, [endpoint])
 
   return (
     <section className="collection">
@@ -11,19 +21,12 @@ export default function Activities() {
         <span>{items.length} records</span>
       </div>
 
-      {loading && <p className="status">Loading data...</p>}
-      {error && <p className="status error">{error}</p>}
-
       <div className="activity-list">
         {items.map((activity) => (
-          <article
-            className="list-row"
-            key={activity._id || `${activity.type}-${activity.completedAt}`}
-          >
+          <article className="list-row" key={activity._id}>
             <span className="row-mark">
               {activity.type?.slice(0, 2).toUpperCase()}
             </span>
-
             <div>
               <strong>{activity.type}</strong>
               <small>
@@ -33,7 +36,6 @@ export default function Activities() {
                   : 'Date pending'}
               </small>
             </div>
-
             <b>{activity.durationMinutes} min</b>
             <b>{activity.calories} kcal</b>
           </article>

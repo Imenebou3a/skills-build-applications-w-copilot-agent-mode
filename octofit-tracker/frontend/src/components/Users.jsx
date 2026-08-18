@@ -1,8 +1,16 @@
-import { useApi, API_BASE_URL } from '../api.js'
-
+import { useEffect, useState } from 'react'
 export default function Users() {
-  const endpoint = `${API_BASE_URL}/api/users/`
-  const { items, loading, error } = useApi(endpoint)
+  const [items, setItems] = useState([])
+  const endpoint = import.meta.env.VITE_CODESPACE_NAME
+    ? `https://${import.meta.env.VITE_CODESPACE_NAME}-8000.app.github.dev/api/users/`
+    : 'http://localhost:8000/api/users/'
+
+  useEffect(() => {
+    fetch(endpoint)
+      .then((response) => response.json())
+      .then((data) => setItems(Array.isArray(data) ? data : data.data || data.results || data.items || []))
+      .catch((error) => console.error('Users API error:', error))
+  }, [endpoint])
 
   return (
     <section className="collection">
@@ -11,19 +19,12 @@ export default function Users() {
         <span>{items.length} profiles</span>
       </div>
 
-      {loading && <p className="status">Loading data...</p>}
-      {error && <p className="status error">{error}</p>}
-
       <div className="card-grid">
         {items.map((user) => (
-          <article
-            className="data-card"
-            key={user._id || user.username}
-          >
+          <article className="data-card" key={user._id}>
             <span className="avatar">
               {user.displayName?.slice(0, 1).toUpperCase()}
             </span>
-
             <h3>{user.displayName}</h3>
             <p>@{user.username}</p>
             <small>Goal: {user.goal}</small>

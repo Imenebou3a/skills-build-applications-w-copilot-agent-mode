@@ -1,8 +1,16 @@
-import { useApi, API_BASE_URL } from '../api.js'
-
+import { useEffect, useState } from 'react'
 export default function Teams() {
-  const endpoint = `${API_BASE_URL}/api/teams/`
-  const { items, loading, error } = useApi(endpoint)
+  const [items, setItems] = useState([])
+  const endpoint = import.meta.env.VITE_CODESPACE_NAME
+    ? `https://${import.meta.env.VITE_CODESPACE_NAME}-8000.app.github.dev/api/teams/`
+    : 'http://localhost:8000/api/teams/'
+
+  useEffect(() => {
+    fetch(endpoint)
+      .then((response) => response.json())
+      .then((data) => setItems(Array.isArray(data) ? data : data.data || data.results || data.items || []))
+      .catch((error) => console.error('Teams API error:', error))
+  }, [endpoint])
 
   return (
     <section className="collection">
@@ -11,19 +19,12 @@ export default function Teams() {
         <span>{items.length} squads</span>
       </div>
 
-      {loading && <p className="status">Loading data...</p>}
-      {error && <p className="status error">{error}</p>}
-
       <div className="card-grid">
         {items.map((team) => (
-          <article
-            className="data-card"
-            key={team._id || team.name}
-          >
+          <article className="data-card" key={team._id}>
             <span className="card-kicker">
               TEAM / {team.memberIds?.length || 0} MEMBERS
             </span>
-
             <h3>{team.name}</h3>
             <p>{team.description}</p>
           </article>
