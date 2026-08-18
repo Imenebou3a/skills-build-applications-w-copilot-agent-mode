@@ -1,4 +1,5 @@
 import express from 'express';
+import mongoose from 'mongoose';
 import connectDB from './config/database';
 
 import { Activity } from './models/Activity';
@@ -12,59 +13,109 @@ const PORT = Number(process.env.PORT ?? 8000);
 
 app.use(express.json());
 
+/**
+ * API base URL
+ *
+ * Codespaces:
+ * https://$CODESPACE_NAME-8000.app.github.dev
+ *
+ * Localhost:
+ * http://localhost:8000
+ */
+const API_BASE_URL = process.env.CODESPACE_NAME
+  ? `https://${process.env.CODESPACE_NAME}-8000.app.github.dev`
+  : `http://localhost:${PORT}`;
+
 app.get('/', (_req, res) => {
-  res.json({ message: 'OctoFit Tracker API' });
+  res.json({
+    message: 'OctoFit Tracker API',
+    apiBaseUrl: API_BASE_URL,
+  });
 });
 
 app.get('/api/users', async (_req, res) => {
-  res.json(await User.find().sort({ displayName: 1 }).lean());
+  try {
+    const users = await User.find()
+      .sort({ displayName: 1 })
+      .lean();
+
+    res.json(users);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to fetch users' });
+  }
 });
 
 app.get('/api/teams', async (_req, res) => {
-  res.json(
-    await Team.find()
+  try {
+    const teams = await Team.find()
       .populate('memberIds', 'displayName username')
       .sort({ name: 1 })
-      .lean()
-  );
+      .lean();
+
+    res.json(teams);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to fetch teams' });
+  }
 });
 
 app.get('/api/activities', async (_req, res) => {
-  res.json(
-    await Activity.find()
+  try {
+    const activities = await Activity.find()
       .populate('userId', 'displayName username')
       .sort({ completedAt: -1 })
-      .lean()
-  );
+      .lean();
+
+    res.json(activities);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to fetch activities' });
+  }
 });
 
 app.get('/api/leaderboard', async (_req, res) => {
-  res.json(
-    await LeaderboardEntry.find()
+  try {
+    const leaderboard = await LeaderboardEntry.find()
       .populate('userId', 'displayName username')
       .populate('teamId', 'name')
       .sort({ rank: 1 })
-      .lean()
-  );
+      .lean();
+
+    res.json(leaderboard);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to fetch leaderboard' });
+  }
 });
 
 app.get('/api/workouts', async (_req, res) => {
-  res.json(
-    await Workout.find()
+  try {
+    const workouts = await Workout.find()
       .sort({ category: 1, name: 1 })
-      .lean()
-  );
+      .lean();
+
+    res.json(workouts);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to fetch workouts' });
+  }
 });
 
 async function startServer(): Promise<void> {
-  await connectDB();
+  try {
+    await connectDB();
 
-  app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
-  });
+    console.log(`API base URL: ${API_BASE_URL}`);
+
+    app.listen(PORT, () => {
+      console.log(`Server is running on port ${PORT}`);
+      console.log(`API available at ${API_BASE_URL}`);
+    });
+  } catch (error) {
+    console.error('Failed to start server:', error);
+    process.exit(1);
+  }
 }
 
-startServer().catch((error: unknown) => {
-  console.error('Server startup error:', error);
-  process.exitCode = 1;
-});
+startServer();
