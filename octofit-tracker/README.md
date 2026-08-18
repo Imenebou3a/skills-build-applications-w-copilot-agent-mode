@@ -66,8 +66,10 @@ npm start
 
 The backend is configured to connect to MongoDB at:
 ```
-mongodb://localhost:27017/octofit-tracker
+mongodb://localhost:27017/octofit_db
 ```
+
+Set `MONGODB_URI` to override the local connection string when needed.
 
 ## Development
 
@@ -79,6 +81,17 @@ mongodb://localhost:27017/octofit-tracker
 ## API Endpoints
 
 - `GET /` - Welcome endpoint returning `{ message: "OctoFit Tracker API" }`
+- `GET /api/users` - User profiles
+- `GET /api/teams` - Teams with populated members
+- `GET /api/activities` - Logged activities with their users
+- `GET /api/leaderboard` - Ranked entries with users and teams
+- `GET /api/workouts` - Workout recommendations
+
+Populate the database with sample data:
+
+```bash
+npm run seed --prefix octofit-tracker/backend
+```
 
 ## Next Steps
 
