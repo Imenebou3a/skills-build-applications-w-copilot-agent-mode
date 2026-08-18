@@ -6,33 +6,48 @@ export const API_BASE_URL = codespaceName
   ? `https://${codespaceName}-8000.app.github.dev`
   : 'http://localhost:8000'
 
+export const API_ENDPOINTS = {
+  activities: `${API_BASE_URL}/api/activities/`,
+  leaderboard: `${API_BASE_URL}/api/leaderboard/`,
+  teams: `${API_BASE_URL}/api/teams/`,
+  users: `${API_BASE_URL}/api/users/`,
+  workouts: `${API_BASE_URL}/api/workouts/`,
+}
+
 export function extractItems(payload) {
   if (Array.isArray(payload)) return payload
 
-  if (!payload || typeof payload !== 'object') {
-    return []
-  }
+  if (!payload || typeof payload !== 'object') return []
 
   for (const key of ['data', 'results', 'items', 'docs']) {
-    if (Array.isArray(payload[key])) {
-      return payload[key]
-    }
+    if (Array.isArray(payload[key])) return payload[key]
   }
 
   return []
 }
 
-export function useApi(path) {
-  const [items, setItems] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
+export function useApi(resource) {
+  const [state, setState] = useState({
+    items: [],
+    loading: true,
+    error: '',
+  })
 
   useEffect(() => {
     const controller = new AbortController()
 
-    const url = `${API_BASE_URL}/api/${path}/`
+    const endpoint = API_ENDPOINTS[resource]
 
-    fetch(url, {
+    if (!endpoint) {
+      setState({
+        items: [],
+        loading: false,
+        error: `Unknown API resource: ${resource}`,
+      })
+      return () => controller.abort()
+    }
+
+    fetch(endpoint, {
       signal: controller.signal,
     })
       .then((response) => {
@@ -42,25 +57,27 @@ export function useApi(path) {
 
         return response.json()
       })
-      .then((data) => {
-        setItems(extractItems(data))
-        setLoading(false)
+      .then((payload) => {
+        setState({
+          items: extractItems(payload),
+          loading: false,
+          error: '',
+        })
       })
-      .catch((err) => {
-        if (err.name !== 'AbortError') {
-          setError(err.message)
-          setLoading(false)
+      .catch((error) => {
+        if (error.name !== 'AbortError') {
+          setState({
+            items: [],
+            loading: false,
+            error: error.message,
+          })
         }
       })
 
     return () => controller.abort()
-  }, [path])
+  }, [resource])
 
-  return {
-    items,
-    loading,
-    error,
-  }
+  return state
 }
 
 export function displayName(value) {
