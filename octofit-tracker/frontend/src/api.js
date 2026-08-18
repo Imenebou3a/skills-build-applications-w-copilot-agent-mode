@@ -6,14 +6,6 @@ export const API_BASE_URL = codespaceName
   ? `https://${codespaceName}-8000.app.github.dev`
   : 'http://localhost:8000'
 
-export const API_ENDPOINTS = {
-  activities: `${API_BASE_URL}/api/activities/`,
-  leaderboard: `${API_BASE_URL}/api/leaderboard/`,
-  teams: `${API_BASE_URL}/api/teams/`,
-  users: `${API_BASE_URL}/api/users/`,
-  workouts: `${API_BASE_URL}/api/workouts/`,
-}
-
 export function extractItems(payload) {
   if (Array.isArray(payload)) return payload
 
@@ -26,7 +18,7 @@ export function extractItems(payload) {
   return []
 }
 
-export function useApi(resource) {
+export function useApi(endpoint) {
   const [state, setState] = useState({
     items: [],
     loading: true,
@@ -35,17 +27,6 @@ export function useApi(resource) {
 
   useEffect(() => {
     const controller = new AbortController()
-
-    const endpoint = API_ENDPOINTS[resource]
-
-    if (!endpoint) {
-      setState({
-        items: [],
-        loading: false,
-        error: `Unknown API resource: ${resource}`,
-      })
-      return () => controller.abort()
-    }
 
     fetch(endpoint, {
       signal: controller.signal,
@@ -75,7 +56,7 @@ export function useApi(resource) {
       })
 
     return () => controller.abort()
-  }, [resource])
+  }, [endpoint])
 
   return state
 }

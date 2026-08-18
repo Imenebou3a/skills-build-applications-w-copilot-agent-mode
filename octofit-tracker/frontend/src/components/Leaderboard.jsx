@@ -1,7 +1,8 @@
-import { displayName, useApi } from '../api.js'
+import { displayName, useApi, API_BASE_URL } from '../api.js'
 
 export default function Leaderboard() {
-  const { items, loading, error } = useApi('leaderboard')
+  const endpoint = `${API_BASE_URL}/api/leaderboard/`
+  const { items, loading, error } = useApi(endpoint)
 
   return (
     <section className="collection">
@@ -11,12 +12,7 @@ export default function Leaderboard() {
       </div>
 
       {loading && <p className="status">Loading data...</p>}
-
       {error && <p className="status error">{error}</p>}
-
-      {!loading && !error && items.length === 0 && (
-        <p className="status">No leaderboard entries found.</p>
-      )}
 
       <div className="leaderboard">
         {items.map((entry, index) => (
@@ -24,9 +20,7 @@ export default function Leaderboard() {
             className="rank-row"
             key={entry._id || displayName(entry.userId)}
           >
-            <span className="rank">
-              {entry.rank || index + 1}
-            </span>
+            <span className="rank">{entry.rank || index + 1}</span>
 
             <div>
               <strong>{displayName(entry.userId)}</strong>
@@ -35,7 +29,7 @@ export default function Leaderboard() {
               </small>
             </div>
 
-            <b>{entry.points || 0} pts</b>
+            <b>{entry.points} pts</b>
           </article>
         ))}
       </div>

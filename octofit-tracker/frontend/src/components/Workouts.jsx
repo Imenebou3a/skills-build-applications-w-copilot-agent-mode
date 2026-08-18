@@ -1,7 +1,8 @@
-import { useApi } from '../api.js'
+import { useApi, API_BASE_URL } from '../api.js'
 
 export default function Workouts() {
-  const { items, loading, error } = useApi('workouts')
+  const endpoint = `${API_BASE_URL}/api/workouts/`
+  const { items, loading, error } = useApi(endpoint)
 
   return (
     <section className="collection">
@@ -11,12 +12,7 @@ export default function Workouts() {
       </div>
 
       {loading && <p className="status">Loading data...</p>}
-
       {error && <p className="status error">{error}</p>}
-
-      {!loading && !error && items.length === 0 && (
-        <p className="status">No workouts found.</p>
-      )}
 
       <div className="card-grid">
         {items.map((workout) => (
@@ -29,7 +25,6 @@ export default function Workouts() {
             </span>
 
             <h3>{workout.name}</h3>
-
             <p>{workout.coachNote}</p>
 
             <small>

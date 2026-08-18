@@ -1,7 +1,8 @@
-import { useApi } from '../api.js'
+import { useApi, API_BASE_URL } from '../api.js'
 
 export default function Users() {
-  const { items, loading, error } = useApi('users')
+  const endpoint = `${API_BASE_URL}/api/users/`
+  const { items, loading, error } = useApi(endpoint)
 
   return (
     <section className="collection">
@@ -11,12 +12,7 @@ export default function Users() {
       </div>
 
       {loading && <p className="status">Loading data...</p>}
-
       {error && <p className="status error">{error}</p>}
-
-      {!loading && !error && items.length === 0 && (
-        <p className="status">No users found.</p>
-      )}
 
       <div className="card-grid">
         {items.map((user) => (
@@ -29,9 +25,7 @@ export default function Users() {
             </span>
 
             <h3>{user.displayName}</h3>
-
             <p>@{user.username}</p>
-
             <small>Goal: {user.goal}</small>
           </article>
         ))}

@@ -1,7 +1,8 @@
-import { useApi } from '../api.js'
+import { useApi, API_BASE_URL } from '../api.js'
 
 export default function Teams() {
-  const { items, loading, error } = useApi('teams')
+  const endpoint = `${API_BASE_URL}/api/teams/`
+  const { items, loading, error } = useApi(endpoint)
 
   return (
     <section className="collection">
@@ -11,12 +12,7 @@ export default function Teams() {
       </div>
 
       {loading && <p className="status">Loading data...</p>}
-
       {error && <p className="status error">{error}</p>}
-
-      {!loading && !error && items.length === 0 && (
-        <p className="status">No teams found.</p>
-      )}
 
       <div className="card-grid">
         {items.map((team) => (
@@ -29,7 +25,6 @@ export default function Teams() {
             </span>
 
             <h3>{team.name}</h3>
-
             <p>{team.description}</p>
           </article>
         ))}

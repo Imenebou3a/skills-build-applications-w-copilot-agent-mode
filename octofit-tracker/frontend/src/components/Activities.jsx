@@ -1,7 +1,8 @@
-import { displayName, useApi } from '../api.js'
+import { displayName, useApi, API_BASE_URL } from '../api.js'
 
 export default function Activities() {
-  const { items, loading, error } = useApi('activities')
+  const endpoint = `${API_BASE_URL}/api/activities/`
+  const { items, loading, error } = useApi(endpoint)
 
   return (
     <section className="collection">
@@ -11,16 +12,7 @@ export default function Activities() {
       </div>
 
       {loading && <p className="status">Loading data...</p>}
-
-      {error && (
-        <p className="status error">
-          {error}
-        </p>
-      )}
-
-      {!loading && !error && items.length === 0 && (
-        <p className="status">No activities found.</p>
-      )}
+      {error && <p className="status error">{error}</p>}
 
       <div className="activity-list">
         {items.map((activity) => (
